@@ -1,0 +1,61 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kafka-monitor
+  labels:
+    app: kafka-monitor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-monitor
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: kafka-monitor
+    spec:
+      imagePullSecrets:
+      - name: "{{ .Values.imagePullSecrets }}"
+      containers:
+      - name: kafka-monitor
+        image: "{{ .Values.kafkaMonitor.image }}:{{ .Values.kafkaMonitor.version }}"
+        imagePullPolicy: "{{ .Values.kafkaMonitor.imagePullPolicy }}"
+        args:
+        - --monitor.bootstrapServers={{ .Values.kafkaMonitor.bootstrapServers }}
+        - --monitor.topic={{ .Values.kafkaMonitor.topic }}
+        - --monitor.messageHz={{ .Values.kafkaMonitor.messageHz }}
+        - --monitor.payloadSize={{ .Values.kafkaMonitor.payloadSize }}
+        - --monitor.eventTimeout={{ .Values.kafkaMonitor.eventTimeout }}
+        - --monitor.acks={{ .Values.kafkaMonitor.acks }}
+        - --monitor.pollTimeout={{ .Values.kafkaMonitor.pollTimeout }}
+        resources:
+          requests:
+            cpu: {{ .Values.kafkaMonitor.cpu }}
+            memory: {{ .Values.kafkaMonitor.memory }}
+          limits:
+            cpu: {{ .Values.kafkaMonitor.cpu }}
+            memory: {{ .Values.kafkaMonitor.memory }}
+        ports:
+        - name: http
+          containerPort: 8080
+        livenessProbe:
+          httpGet:
+            path: /actuator/health
+            port: http
+          initialDelaySeconds: 120
+          failureThreshold: 6
+          periodSeconds: 10
+          timeoutSeconds: 3
+          successThreshold: 1
+        readinessProbe:
+          httpGet:
+            path: /actuator/health
+            port: http
+          initialDelaySeconds: 30
+          failureThreshold: 36
+          periodSeconds: 6
+          timeoutSeconds: 3
+          successThreshold: 1

@@ -1,0 +1,17 @@
+---
+imagePullSecrets: "UNDEFINED"
+
+kafkaMonitor:
+  image: "UNDEFINED"
+  version: "UNDEFINED"
+  imagePullPolicy: "Always"
+  cpu: "1000m"
+  memory: "4Gi"
+
+  bootstrapServers: "UNDEFINED"
+  topic: "UNDEFINED"
+  messageHz: 100
+  payloadSize: 1024
+  eventTimeout: "PT1M"
+  acks: "all"
+  pollTimeout: "PT0.1S"
